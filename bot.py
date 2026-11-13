@@ -1,33 +1,31 @@
+import os
 import telebot
 from telebot import types
-import threading
-import http.server
-import socketserver
+from flask import Flask, request
 
-# 1. Микро-сервер для обхода проверки портов Render
-def run_dummy_server():
-    class DummyHandler(http.server.SimpleHTTPRequestHandler):
-        def do_GET(self):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(b"Bot is running!")
-            
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", 10000), DummyHandler) as httpd:
-        httpd.serve_forever()
-
-threading.Thread(target=run_dummy_server, daemon=True).start()
-
-# 2. Основной код вашего бота
+# Данные вашего бота
 BOT_TOKEN = "9035255606:AAEz8CZZh7y5UOEEcl76-R948hyjxMjRHr4"
 ADMIN_SETS = "evolution_12"   # Для продажи сетов
 ADMIN_SOPR = "Sin20014"       # Для сопровождения
 REVIEWS_URL = "https://t.me"  # Канал с отзывами
 
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
+app = Flask(__name__)
 
-# Главное меню
+@app.route('/' + BOT_TOKEN, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@app.route("/")
+def webhook():
+    bot.remove_webhook()
+    render_url = os.environ.get("RENDER_EXTERNAL_URL", "https://onrender.com")
+    bot.set_webhook(url=render_url + '/' + BOT_TOKEN)
+    return "Bot is running!", 200
+
 def main_menu():
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn_shop = types.InlineKeyboardButton("🛒 Каталог товаров", callback_data="open_shop")
@@ -61,7 +59,6 @@ def callback_inline(call):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="📦 **Выберите категорию товаров:**", reply_markup=markup, parse_mode="Markdown")
 
-    # Вкладка: Сеты (6 комплектов)
     elif call.data == "cat_sets":
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn_set1 = types.InlineKeyboardButton("🎒 Фул 6 + МК + ВК + МГ3 — 120 руб.", callback_data="buy_set_6_mg3")
@@ -76,7 +73,6 @@ def callback_inline(call):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="🎒 **Доступные комплекты брони и оружия (Сеты):**\n\nВыбирайте нужный товар:", reply_markup=markup, parse_mode="Markdown")
 
-    # Вкладка: Сопровождение (Полные 10 тарифов)
     elif call.data == "cat_sopr":
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn_s1 = types.InlineKeyboardButton("🗺️ Спр 7карта (вынос 5-11м + шмот) — 450 руб.", callback_data="buy_sopr_7_short")
@@ -95,19 +91,16 @@ def callback_inline(call):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="🗺️ **Услуги сопровождения (Сопроводы):**\n\nВынос лута со шмотом и гарантиями по билетам/лимонам:", reply_markup=markup, parse_mode="Markdown")
 
-    # Оформление заказа (Все скобки на месте!)
     elif call.data.startswith("buy_"):
         item_code = call.data.replace("buy_", "")
         
         items_dict = {
-            # Сеты
             "set_6_mg3": "🎒 Фул 6 + МК + ВК + МГ3 (Цена: 120 руб.)",
             "set_6kb_mg3": "🎒 Фул 6 КБ + МК + ВК + МГ3 (Цена: 150 руб.)",
             "set_6sf_mg3": "🎒 Фул 6 СФ + МК + ВК + МГ3 (Цена: 180 руб.)",
             "set_6_gold": "🟡 Фул 6 + МК + ВК + МГ3 [Золото] (Цена: 270 руб.)",
             "set_6kb_gold": "🟡 Фул 6 КБ + МК + ВК + МГ3 [Золото] (Цена: 330 руб.)",
             "set_6sf_gold": "🟡 Фул СФ 6 + МК + ВК + МГ3 [Золото] (Цена: 370 руб.)",
-            # Сопровождение
             "sopr_7_short": "🗺️ Сопровождение на 7 карту [вынос от 5-11м + шмот] (Цена: 450 руб.)",
             "sopr_8_classic": "🎫 Сопровождение на 8 карту [вынос от 10-20м + шмот + гарант 8 билетов] (Цена: 400 руб.)",
             "sopr_7_long": "🗺️ Сопровождение на 7 карту [вынос от 7-15м + шмот] (Цена: 530 руб.)", 
@@ -155,9 +148,7 @@ def callback_inline(call):
 
     elif call.data == "open_support":
         markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("👨‍💻 Написать главному админу", url=f"t.me/{ADMIN_SOPR}"))
+        markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
         
-                              
-        
-    
-
-
