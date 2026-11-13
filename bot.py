@@ -4,7 +4,7 @@ import threading
 import http.server
 import socketserver
 
-# 1. Чистый микро-сервер для обхода проверки портов Render
+# 1. Микро-сервер для обхода проверки портов Render
 def run_dummy_server():
     class DummyHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
@@ -13,12 +13,10 @@ def run_dummy_server():
             self.end_headers()
             self.wfile.write(b"Bot is running!")
             
-    # Используем порт 10000, который Render сканирует по умолчанию
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 10000), DummyHandler) as httpd:
         httpd.serve_forever()
 
-# Запуск сервера в отдельном потоке, чтобы бот работал параллельно
 threading.Thread(target=run_dummy_server, daemon=True).start()
 
 # 2. Основной код вашего бота
@@ -97,7 +95,7 @@ def callback_inline(call):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="🗺️ **Услуги сопровождения (Сопроводы):**\n\nВынос лута со шмотом и гарантиями по билетам/лимонам:", reply_markup=markup, parse_mode="Markdown")
 
-    # Оформление заказа
+    # Оформление заказа (Все скобки на месте!)
     elif call.data.startswith("buy_"):
         item_code = call.data.replace("buy_", "")
         
@@ -153,6 +151,11 @@ def callback_inline(call):
         markup.add(types.InlineKeyboardButton("🔗 Открыть канал с отзывами", url=REVIEWS_URL))
         markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
+                              text="⭐ **Гарантии и Отзывы:**\n\nМы работаем честно и быстро! Все отзывы наших покупателей вы можете посмотреть по ссылке ниже.", reply_markup=markup, parse_mode="Markdown")
+
+    elif call.data == "open_support":
+        markup = types.InlineKeyboardMarkup()
+        
                               
         
     
