@@ -26,6 +26,7 @@ def webhook():
     bot.set_webhook(url=render_url + '/' + BOT_TOKEN)
     return "Bot is running!", 200
 
+# Главное меню
 def main_menu():
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn_shop = types.InlineKeyboardButton("🛒 Каталог товаров", callback_data="open_shop")
@@ -47,8 +48,7 @@ def start_message(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.data == "main_menu":
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text="🤖 Главное меню Metro Shop:", reply_markup=main_menu())
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="🤖 Главное меню Metro Shop:", reply_markup=main_menu())
         
     elif call.data == "open_shop":
         markup = types.InlineKeyboardMarkup(row_width=1)
@@ -56,9 +56,9 @@ def callback_inline(call):
         btn_sopr = types.InlineKeyboardButton("🗺️ Сопровождение (Вынос)", callback_data="cat_sopr")
         btn_back = types.InlineKeyboardButton("⬅️ Назад", callback_data="main_menu")
         markup.add(btn_sets, btn_sopr, btn_back)
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text="📦 **Выберите категорию товаров:**", reply_markup=markup, parse_mode="Markdown")
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="📦 **Выберите категорию товаров:**", reply_markup=markup, parse_mode="Markdown")
 
+    # Вкладка: Сеты (6 комплектов)
     elif call.data == "cat_sets":
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn_set1 = types.InlineKeyboardButton("🎒 Фул 6 + МК + ВК + МГ3 — 120 руб.", callback_data="buy_set_6_mg3")
@@ -70,9 +70,9 @@ def callback_inline(call):
         
         btn_back = types.InlineKeyboardButton("⬅️ Назад в категории", callback_data="open_shop")
         markup.add(btn_set1, btn_set2, btn_set3, btn_set4, btn_set5, btn_set6, btn_back)
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text="🎒 **Доступные комплекты брони и оружия (Сеты):**\n\nВыбирайте нужный товар:", reply_markup=markup, parse_mode="Markdown")
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="🎒 **Доступные комплекты брони и оружия (Сеты):**\n\nВыбирайте нужный товар:", reply_markup=markup, parse_mode="Markdown")
 
+    # Вкладка: Сопровождение (10 тарифов)
     elif call.data == "cat_sopr":
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn_s1 = types.InlineKeyboardButton("🗺️ Спр 7карта (вынос 5-11м + шмот) — 450 руб.", callback_data="buy_sopr_7_short")
@@ -88,9 +88,9 @@ def callback_inline(call):
         
         btn_back = types.InlineKeyboardButton("⬅️ Назад в категории", callback_data="open_shop")
         markup.add(btn_s1, btn_s2, btn_s3, btn_s4, btn_s5, btn_s6, btn_s7, btn_s8, btn_s9, btn_s10, btn_back)
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text="🗺️ **Услуги сопровождения (Сопроводы):**\n\nВынос лута со шмотом и гарантиями по билетам/лимонам:", reply_markup=markup, parse_mode="Markdown")
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="🗺️ **Услуги сопровождения (Сопроводы):**\n\nВынос лута со шмотом и гарантиями по билетам/лимонам:", reply_markup=markup, parse_mode="Markdown")
 
+    # Оформление заказа
     elif call.data.startswith("buy_"):
         item_code = call.data.replace("buy_", "")
         
@@ -125,13 +125,8 @@ def callback_inline(call):
         btn_back = types.InlineKeyboardButton("⬅️ В магазин", callback_data="open_shop")
         markup.add(btn_admin, btn_back)
         
-        order_text = (
-            f"🛒 **Вы выбрали:**\n{selected_item}\n\n"
-            "Чтобы совершить покупку, произвести оплату и договориться о времени, "
-            "нажмите кнопку ниже и напишите нашему продавцу."
-        )
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text=order_text, reply_markup=markup, parse_mode="Markdown")
+        order_text = (f"🛒 **Вы выбрали:**\n{selected_item}\n\nЧтобы совершить покупку, произвести оплату и договориться о времени, нажмите кнопку ниже и напишите нашему продавцу.")
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=order_text, reply_markup=markup, parse_mode="Markdown")
 
     elif call.data == "open_profile":
         markup = types.InlineKeyboardMarkup()
@@ -143,12 +138,11 @@ def callback_inline(call):
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("🔗 Открыть канал с отзывами", url=REVIEWS_URL))
         markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                              text="⭐ **Гарантии и Отзывы:**\n\nМы работаем честно и быстро! Все отзывы наших покупателей вы можете посмотреть по ссылке ниже.", reply_markup=markup, parse_mode="Markdown")
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="⭐ **Гарантии и Отзывы:**\n\nМы работаем честно и быстро! Все отзывы наших покупателей вы можете посмотреть по ссылке ниже.", reply_markup=markup, parse_mode="Markdown")
 
     elif call.data == "open_support":
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("👨‍💻 Написать главному админу", url=f"t.me/{ADMIN_SOPR}"))
         markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-        
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="👨‍💻 Возникли вопросы или проблемы? Напишите администрации напрямую.", reply_markup=markup)
+
