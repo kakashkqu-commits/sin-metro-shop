@@ -5,6 +5,7 @@ from telebot import types
 BOT_TOKEN = "9035255606:AAEz8CZZh7y5UOEEcl76-R948hyjxMjRHr4"
 ADMIN_SETS = "evolution_12"   # Для продажи сетов
 ADMIN_SOPR = "Sin20014"       # Для сопровождения
+REVIEWS_URL = "https://t.me"  # Канал с отзывами
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -51,18 +52,18 @@ def callback_inline(call):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="🎒 **Доступные комплекты (Сеты):**\n\nВыбирайте нужный товар:", reply_markup=markup, parse_mode="Markdown")
 
-    # Вкладка: Сопровождение (ТЕПЕРЬ 10 ТАРИФОВ)
+    # Вкладка: Сопровождение (Все цены обновлены)
     elif call.data == "cat_sopr":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        btn_s1 = types.InlineKeyboardButton("🗺️ Спр 7карта (вынос 5-11м + шмот) — 150 руб.", callback_data="buy_sopr_7_short")
-        btn_s2 = types.InlineKeyboardButton("🗺️ Спр 7карта (вынос 7-15м + шмот) — 230 руб.", callback_data="buy_sopr_7_long")
+        btn_s1 = types.InlineKeyboardButton("🗺️ Спр 7карта (вынос 5-11м + шмот) — 450 руб.", callback_data="buy_sopr_7_short")
+        # ИСПРАВЛЕНО: цена 530 руб.
+        btn_s2 = types.InlineKeyboardButton("🗺️ Спр 7карта (вынос 7-15м + шмот) — 530 руб.", callback_data="buy_sopr_7_long")
         btn_s3 = types.InlineKeyboardButton("💎 Спр 7карта (вынос 10-20м + шмот) — 550 руб.", callback_data="buy_sopr_7_max")
-        
-        # --- НОВЫЕ ТОВАРЫ ДЛЯ 7 КАРТЫ С ГАРАНТОМ ---
         btn_s4 = types.InlineKeyboardButton("🎫 Спр 7карта (Гарант 9л + шмот) — 350 руб.", callback_data="buy_sopr_7_g9")
         btn_s5 = types.InlineKeyboardButton("⚡ Спр 7карта (Гарант 15л + шмот) — 660 руб.", callback_data="buy_sopr_7_g15")
+        # ИСПРАВЛЕНО: цена 520 руб.
+        btn_s6 = types.InlineKeyboardButton("🗺️ Сопр 7-8карта (вынос 7-20м + шмот) — 520 руб.", callback_data="buy_sopr_78")
         
-        btn_s6 = types.InlineKeyboardButton("🗺️ Сопр 7-8карта (вынос 7-20м + шмот) — 320 руб.", callback_data="buy_sopr_78")
         btn_s7 = types.InlineKeyboardButton("🎫 Спр 8карта (вынос 10-20м + шмот + Гарант 8 бил) — 400 руб.", callback_data="buy_sopr_8_classic")
         btn_s8 = types.InlineKeyboardButton("🔥 Спр 8карта (вынос 10-25м + шмот + Гарант 12 бил) — 450 руб.", callback_data="buy_sopr_8_medium")
         btn_s9 = types.InlineKeyboardButton("👑 Спр 8карта (вынос 20-35м + шмот + Гарант 16 бил) — 1000 руб.", callback_data="buy_sopr_8_hard")
@@ -79,14 +80,12 @@ def callback_inline(call):
         
         items_dict = {
             "set_full6": "🎒 Фул 6 сет с МК и ВК (Цена: 100 руб.)",
-            "sopr_7_short": "🗺️ Сопровождение на 7 карту [вынос от 5-11м + шмот] (Цена: 150 руб.)",
-            "sopr_7_long": "🗺️ Сопровождение на 7 карту [вынос от 7-15м + шмот] (Цена: 230 руб.)",
+            "sopr_7_short": "🗺️ Сопровождение на 7 карту [вынос от 5-11м + шмот] (Цена: 450 руб.)",
+            "sopr_7_long": "🗺️ Сопровождение на 7 карту [вынос от 7-15м + шмот] (Цена: 530 руб.)", # ИСПРАВЛЕНО
             "sopr_7_max": "💎 Топ-Сопровождение на 7 карту [вынос от 10-20м + шмот] (Цена: 550 руб.)",
-            # Новые позиции:
             "sopr_7_g9": "🎫 Сопровождение на 7 карту [Гарант 9 лимонов + шмот] (Цена: 350 руб.)",
             "sopr_7_g15": "⚡ Сопровождение на 7 карту [Гарант 15 лимонов + шмот] (Цена: 660 руб.)",
-            
-            "sopr_78": "🗺️ Сопровождение 7-8 карта [вынос 7-20м + шмот] (Цена: 320 руб.)",
+            "sopr_78": "🗺️ Сопровождение 7-8 карта [вынос 7-20м + шмот] (Цена: 520 руб.)", # ИСПРАВЛЕНО
             "sopr_8_classic": "🎫 Сопровождение на 8 карту [вынос от 10-20м + шмот + гарант 8 билетов] (Цена: 400 руб.)",
             "sopr_8_medium": "🔥 Сопровождение на 8 карту [вынос от 10-25м + шмот + гарант 12 билетов] (Цена: 450 руб.)",
             "sopr_8_hard": "👑 VIP-Сопровождение на 8 карту [вынос от 20-35м + шмот + гарант 16 билетов] (Цена: 1000 руб.)",
@@ -121,7 +120,7 @@ def callback_inline(call):
 
     elif call.data == "open_reviews":
         markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("🔗 Открыть канал с отзывами", url="https://t.me"))
+        markup.add(types.InlineKeyboardButton("🔗 Открыть канал с отзывами", url=REVIEWS_URL))
         markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
                               text="⭐ **Гарантии и Отзывы:**\n\nМы работаем честно и быстро! Все отзывы наших покупателей вы можете посмотреть по ссылке ниже.", reply_markup=markup, parse_mode="Markdown")
@@ -134,3 +133,4 @@ def callback_inline(call):
                               text="👨‍💻 Возникли вопросы или проблемы? Напишите администрации напрямую.", reply_markup=markup)
 
 bot.polling(none_stop=True)
+
