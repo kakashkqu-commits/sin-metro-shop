@@ -1,9 +1,10 @@
 import telebot
 from telebot import types
 import threading
-from http.server import Flask, http.server
+import http.server
+import socketserver
 
-# 1. Микро-сервер для обхода проверки портов Render
+# 1. Исправленный микро-сервер для обхода проверки портов Render
 def run_dummy_server():
     class DummyHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
@@ -12,11 +13,11 @@ def run_dummy_server():
             self.end_headers()
             self.wfile.write(b"Bot is running!")
             
-    server_address = ('', 10000) # Render использует этот порт по умолчанию
-    httpd = http.server.HTTPServer(server_address, DummyHandler)
-    httpd.serve_forever()
+    # Используем порт 10000, который Render сканирует по умолчанию
+    with socketserver.TCPServer(("", 10000), DummyHandler) as httpd:
+        httpd.serve_forever()
 
-# Запуск сервера в отдельном потоке, чтобы он не мешал боту
+# Запуск сервера в отдельном потоке, чтобы бот работал параллельно
 threading.Thread(target=run_dummy_server, daemon=True).start()
 
 # 2. Основной код вашего бота
@@ -144,5 +145,6 @@ def callback_inline(call):
                               text="👨‍💻 Возникли вопросы или проблемы? Напишите администрации напрямую.", reply_markup=markup)
 
 bot.polling(none_stop=True)
+    
 
 
